@@ -473,9 +473,6 @@
 
             <div class="summary-card">
                 <h3>🔑 Quản trị Admin</h3>
-                <div class="admin-info">
-                    ⚠️ Admin có thể thêm trận, sửa điểm thành viên, xóa nhật ký. Mật khẩu mặc định: <b>ncc2024</b>
-                </div>
 
                 <div id="adminPanel_locked">
                     <div class="input-group">
@@ -606,6 +603,24 @@ let membersData = [];
 let matchesData = [];
 let diaryData = [];
 let isAdmin = false;
+
+const APP_USERS = [
+    { username: 'Admin',        password: 'Ncc@2026',     name: 'Admin',         isAdmin: true  },
+    { username: 'HienCun',      password: 'HienCun2026',  name: 'Hiền Cún',      isAdmin: false },
+    { username: 'HieuDo',       password: 'Hieu2026',     name: 'Hiếu Dosn',     isAdmin: false },
+    { username: 'MaiLan',       password: 'Lan2026',      name: 'Mai Lan',       isAdmin: false },
+    { username: 'DuyHien',      password: 'DuyHien2026',  name: 'Duy Hiển',      isAdmin: false },
+    { username: 'BaTung',       password: 'Tung2026',     name: 'Tùng LS',       isAdmin: false },
+    { username: 'MinhThanh',    password: 'Thanh2026',    name: 'Thạnh',         isAdmin: false },
+    { username: 'TruongHuyen',  password: 'Huyen2026',    name: 'Trương Huyền',  isAdmin: false },
+    { username: 'VanHoang',     password: 'Hoang2026',    name: 'Văn Hoàng',     isAdmin: false }
+];
+
+let currentUser = null;
+try {
+    const saved = localStorage.getItem('ncc_current_user');
+    if (saved) currentUser = JSON.parse(saved);
+} catch {}
 
 const calcPoints = m => 1000 + m.wins - m.losses;
 const calcWinRate = m => m.matches > 0 ? Math.round(m.wins / m.matches * 100) : 0;
@@ -1046,12 +1061,105 @@ window.triggerBackup = function() {
 
 window.toggleAuthModal = function() {
     document.getElementById('authModal').classList.add('active');
+    if (currentUser) {
+        document.getElementById('authContent').innerHTML = `
+            <p style="margin-bottom:15px;">Đang đăng nhập với tên: <strong>${escHtml(currentUser.name)}</strong></p>
+            <button class="btn btn-danger" onclick="logoutUser()" style="width:100%;margin-bottom:10px;">🚪 Đăng xuất</button>
+            <button class="btn" onclick="closeAuthModal()" style="width:100%;">❌ Đóng</button>
+        `;
+        return;
+    }
     document.getElementById('authContent').innerHTML = `
-        <p style="margin-bottom:15px;">Chọn phương thức đăng nhập:</p>
-        <button class="btn" onclick="alert('🔐 Google Sign-In sẽ sớm được hỗ trợ')" style="width:100%;margin-bottom:10px;">🔵 Google</button>
+        <p style="margin-bottom:15px;">Nhập tên đăng nhập và mật khẩu:</p>
+        <div class="input-group">
+            <label>Tên đăng nhập:</label>
+            <input type="text" id="loginUsername" placeholder="Nhập tên đăng nhập..." autocomplete="username">
+        </div>
+        <div class="input-group">
+            <label>Mật khẩu:</label>
+            <input type="password" id="loginPassword" placeholder="Nhập mật khẩu..." autocomplete="current-password"
+                   onkeydown="if(event.key==='Enter') loginUser()">
+        </div>
+        <p id="loginError" style="color:var(--red);margin-bottom:10px;display:none;">❌ Sai tên đăng nhập hoặc mật khẩu.</p>
+        <button class="btn btn-green" onclick="loginUser()" style="width:100%;margin-bottom:10px;">🔓 Đăng nhập</button>
         <button class="btn" onclick="closeAuthModal()" style="width:100%;">❌ Đóng</button>
     `;
+    setTimeout(() => document.getElementById('loginUsername').focus(), 50);
 };
+
+window.loginUser = function() {
+    const u = document.getElementById('loginUsername').value.trim();
+    const p = document.getElementById('loginPassword').value;
+    if (!u || !p) {
+        document.getElementById('loginError').textContent = '❌ Vui lòng nhập đầy đủ thông tin.';
+        document.getElementById('loginError').style.display = 'block';
+        return;
+    }
+    const found = APP_USERS.find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p);
+    if (!found) {
+        document.getElementById('loginError').textContent = '❌ Sai tên đăng nhập hoặc mật khẩu.';
+        document.getElementById('loginError').style.display = 'block';
+        return;
+    }
+    currentUser = { username: found.username, name: found.name, isAdmin: !!found.isAdmin };
+    localStorage.setItem('ncc_current_user', JSON.stringify(currentUser));
+    if (currentUser.isAdmin) {
+        isAdmin = true;
+        const lockedEl = document.getElementById('adminPanel_locked');
+        const unlockedEl = document.getElementById('adminPanel_unlocked');
+        if (lockedEl) lockedEl.style.display = 'none';
+        if (unlockedEl) unlockedEl.style.display = 'block';
+        const addForm = document.getElementById('addMatchForm');
+        if (addForm) addForm.style.display = 'block';
+        populateEditDropdown();
+        renderDiary();
+    }
+    updateAuthUI();
+    closeAuthModal();
+    showToast(`✅ Xin chào ${currentUser.name}!`);
+};
+
+window.logoutUser = function() {
+    const wasAdmin = currentUser && currentUser.isAdmin;
+    currentUser = null;
+    localStorage.removeItem('ncc_current_user');
+    if (wasAdmin) {
+        isAdmin = false;
+        const lockedEl = document.getElementById('adminPanel_locked');
+        const unlockedEl = document.getElementById('adminPanel_unlocked');
+        if (lockedEl) lockedEl.style.display = 'block';
+        if (unlockedEl) unlockedEl.style.display = 'none';
+        const addForm = document.getElementById('addMatchForm');
+        if (addForm) addForm.style.display = 'none';
+        renderDiary();
+    }
+    updateAuthUI();
+    closeAuthModal();
+    showToast('👋 Đã đăng xuất.');
+};
+
+function updateAuthUI() {
+    const info = document.getElementById('userInfo');
+    const btn = document.getElementById('authBtn');
+    if (currentUser) {
+        info.innerHTML = `👤 ${escHtml(currentUser.name)}${currentUser.isAdmin ? ' <span class="admin-badge">ADMIN</span>' : ''}`;
+        btn.textContent = '🚪 Đăng xuất';
+    } else {
+        info.innerHTML = '';
+        btn.textContent = '🔑 Đăng nhập';
+    }
+}
+
+if (currentUser && currentUser.isAdmin) {
+    isAdmin = true;
+    const lockedEl = document.getElementById('adminPanel_locked');
+    const unlockedEl = document.getElementById('adminPanel_unlocked');
+    if (lockedEl) lockedEl.style.display = 'none';
+    if (unlockedEl) unlockedEl.style.display = 'block';
+    const addForm = document.getElementById('addMatchForm');
+    if (addForm) addForm.style.display = 'block';
+}
+updateAuthUI();
 
 window.closeAuthModal = function() {
     document.getElementById('authModal').classList.remove('active');
