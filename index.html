@@ -100,6 +100,10 @@
 
         .summary-card { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 12px 0; border-left: 5px solid var(--orange); }
 
+        .diary-post { margin-bottom: 20px; border: 1px solid #ddd; border-radius: 10px; overflow: hidden; background: #fff; }
+        .diary-img { width: 100%; max-height: 400px; object-fit: cover; display: block; }
+        .diary-body { padding: 15px; }
+
         #loadingOverlay {
             position: fixed; inset: 0; background: white;
             display: flex; align-items: center; justify-content: center; z-index: 9999;
@@ -174,17 +178,16 @@
         <div class="tab-content" id="diary">
             <div class="add-form" id="diaryForm" style="display:none;">
                 <h3>📸 Chia sẻ khoảnh khắc</h3>
-                <input type="text" id="diaryTitle" placeholder="Tiêu đề..." style="width:100%; margin-bottom:10px; padding:10px;">
+                <input type="text" id="diaryTitle" placeholder="Tiêu đề cảm xúc..." style="width:100%; margin:10px 0; padding:10px; border-radius:5px; border:1px solid #ccc;">
                 <input type="file" id="diaryImg" accept="image/*" onchange="previewImg(event)" style="margin-bottom:10px;">
-                <button class="btn btn-green" onclick="postDiary()">🚀 Đăng bài</button>
-                <div id="aiStatus"></div>
+                <div id="imgPreviewContainer" style="margin-bottom:10px;"></div>
+                <button class="btn btn-green" id="btnPostDiary" onclick="postDiary()">🚀 Đăng bài</button>
             </div>
             <div id="diaryFeed"></div>
         </div>
 
         <!-- SETTINGS -->
         <div class="tab-content" id="settings">
-            <!-- PROFILE -->
             <div class="summary-card" id="profileCard" style="display:none;">
                 <h3>👤 Hồ sơ cá nhân</h3>
                 <div class="form-row">
@@ -194,7 +197,6 @@
                 </div>
             </div>
 
-            <!-- ADMIN: Quản lý thành viên -->
             <div class="summary-card" id="adminCard" style="display:none;">
                 <h3>👥 Quản lý thành viên (Admin)</h3>
                 <div class="form-row">
@@ -237,13 +239,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Variables
 let currentUser = JSON.parse(localStorage.getItem('ncc_user') || 'null');
 let usersData = {};
 let matchesData = [];
 let membersData = [];
+let diaryData = [];
 
-// Helper
 const showToast = (msg) => {
     const t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
@@ -252,12 +253,13 @@ const showToast = (msg) => {
 
 const esc = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;');
 
-// --- REAL-TIME SYNC ---
+// SYNC
 onValue(ref(db, '/'), snap => {
     const data = snap.val() || {};
     usersData = data.users || {};
     matchesData = data.matches ? Object.entries(data.matches).map(([k,v])=>({...v, _key: k})) : [];
     membersData = data.members || [];
+    diaryData = data.diary ? Object.entries(data.diary).map(([k,v])=>({...v, _key: k})) : [];
     
     renderAll();
     document.getElementById('loadingOverlay').style.display = 'none';
@@ -271,7 +273,7 @@ function renderAll() {
     renderDiaryFeed();
 }
 
-// --- AUTH LOGIC ---
+// AUTH
 window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('active');
 
 window.login = () => {
@@ -285,9 +287,7 @@ window.login = () => {
         toggleAuthModal();
         showToast("Chào mừng " + found.name);
         renderAll();
-    } else {
-        alert("Sai tài khoản hoặc mật khẩu!");
-    }
+    } else { alert("Sai tài khoản hoặc mật khẩu!"); }
 };
 
 window.logout = () => {
@@ -315,40 +315,35 @@ function updateAuthUI() {
     }
 }
 
-// --- CORE FEATURES ---
-
-// 1. Admin: Thêm thành viên
+// ADMIN & PROFILE
 window.adminAddUser = () => {
     const u = document.getElementById('newUsername').value.trim();
     const p = document.getElementById('newPassword').value;
     const n = document.getElementById('newFullName').value.trim();
     if (!u || !p || !n) return alert("Nhập đủ thông tin!");
-
-    update(ref(db, 'users/' + u), { username: u, password: p, name: n, isAdmin: false })
-    .then(() => {
-        // Khởi tạo cả trong bảng điểm
+    update(ref(db, 'users/' + u), { username: u, password: p, name: n, isAdmin: false }).then(() => {
         const newList = [...membersData, { name: n, matches: 0, wins: 0, losses: 0 }];
         set(ref(db, 'members'), newList);
-        showToast("Đã thêm thành viên mới!");
+        showToast("Đã thêm thành viên!");
     });
 };
 
-// 2. Profile: Tự sửa thông tin
 window.updateProfile = async () => {
     const newName = document.getElementById('profileName').value.trim();
     const file = document.getElementById('profileAvatar').files[0];
     let updates = {};
     if (newName) updates.name = newName;
-    if (file) {
-        const base64 = await toBase64(file);
-        updates.avatar = base64;
-    }
+    if (file) updates.avatar = await toBase64(file);
     if (Object.keys(updates).length > 0) {
-        update(ref(db, 'users/' + currentUser.username), updates).then(() => showToast("Đã cập nhật profile!"));
+        update(ref(db, 'users/' + currentUser.username), updates).then(() => {
+            currentUser = {...currentUser, ...updates};
+            localStorage.setItem('ncc_user', JSON.stringify(currentUser));
+            showToast("Đã cập nhật!");
+        });
     }
 };
 
-// 3. Matches: Thêm & Sửa
+// MATCHES
 window.saveMatch = () => {
     const key = document.getElementById('editMatchKey').value;
     const data = {
@@ -357,11 +352,8 @@ window.saveMatch = () => {
         score: document.getElementById('mScore').value,
         by: currentUser.name
     };
-    if (key) {
-        update(ref(db, 'matches/' + key), data).then(() => showToast("Đã cập nhật!"));
-    } else {
-        push(ref(db, 'matches'), data).then(() => showToast("Đã thêm trận!"));
-    }
+    if (key) update(ref(db, 'matches/' + key), data).then(() => showToast("Đã cập nhật!"));
+    else push(ref(db, 'matches'), data).then(() => showToast("Đã thêm trận!"));
     resetMatchForm();
 };
 
@@ -375,58 +367,89 @@ window.editMatch = (key) => {
     window.scrollTo(0,0);
 };
 
-// --- RENDER FUNCTIONS ---
+// DIARY
+window.previewImg = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const base64 = await toBase64(file);
+        document.getElementById('imgPreviewContainer').innerHTML = `<img src="${base64}" style="width:100%; border-radius:5px;">`;
+    }
+};
+
+window.postDiary = async () => {
+    const title = document.getElementById('diaryTitle').value.trim();
+    const file = document.getElementById('diaryImg').files[0];
+    if (!title || !file) return alert("Vui lòng nhập tiêu đề và chọn ảnh!");
+    
+    document.getElementById('btnPostDiary').disabled = true;
+    const imgBase64 = await toBase64(file);
+    push(ref(db, 'diary'), {
+        title, img: imgBase64, user: currentUser.name, avatar: usersData[currentUser.username]?.avatar || '', date: new Date().toLocaleString('vi-VN')
+    }).then(() => {
+        showToast("Đã đăng nhật ký!");
+        document.getElementById('diaryTitle').value = "";
+        document.getElementById('diaryImg').value = "";
+        document.getElementById('imgPreviewContainer').innerHTML = "";
+        document.getElementById('btnPostDiary').disabled = false;
+    });
+};
+
+window.renderDiaryFeed = () => {
+    document.getElementById('diaryFeed').innerHTML = diaryData.slice().reverse().map(d => `
+        <div class="diary-post">
+            <img src="${d.img}" class="diary-img">
+            <div class="diary-body">
+                <div style="display:flex; align-items:center; margin-bottom:10px;">
+                    <img src="${d.avatar || 'https://via.placeholder.com/30'}" style="width:30px; height:30px; border-radius:50%; margin-right:10px;">
+                    <b>${esc(d.user)}</b> <span style="color:#888; font-size:0.8em; margin-left:10px;">${d.date}</span>
+                </div>
+                <h3>${esc(d.title)}</h3>
+            </div>
+        </div>
+    `).join('');
+};
+
+// RENDERERS
 function renderDashboard() {
     document.getElementById('statMatches').textContent = matchesData.length;
-    let totalFund = 0;
+    let tf = 0;
     const html = membersData.map(m => {
-        totalFund += (m.losses * 100000);
+        tf += (m.losses * 100000);
         return `<tr><td><b>${esc(m.name)}</b></td><td>${m.matches}</td><td>${m.wins}</td><td>${m.losses}</td><td>${1000+m.wins-m.losses}</td></tr>`;
     }).join('');
     document.getElementById('rankTable').querySelector('tbody').innerHTML = html;
-    document.getElementById('statFund').textContent = totalFund.toLocaleString();
+    document.getElementById('statFund').textContent = tf.toLocaleString();
 }
 
 function renderMatches() {
-    const list = document.getElementById('matchesList');
-    list.innerHTML = matchesData.slice().reverse().map(m => `
+    document.getElementById('matchesList').innerHTML = matchesData.slice().reverse().map(m => `
         <div class="summary-card">
             <b>📅 ${esc(m.date)}</b> | ${esc(m.teams)} | <span style="color:var(--green)">${esc(m.score)}</span>
-            ${currentUser ? `<br><button onclick="editMatch('${m._key}')" style="margin-top:5px; font-size:0.8em; cursor:pointer;">[Sửa]</button>` : ''}
+            ${currentUser ? `<br><button onclick="editMatch('${m._key}')" style="margin-top:5px; cursor:pointer; padding:2px 8px;">[Sửa]</button>` : ''}
         </div>
     `).join('');
 }
 
 function renderFund() {
-    const html = membersData.map(m => `
+    document.getElementById('fundTableBody').innerHTML = membersData.map(m => `
         <tr><td><b>${esc(m.name)}</b></td><td>${m.losses}</td><td style="color:var(--orange); font-weight:bold;">${(m.losses*100000).toLocaleString()}đ</td></tr>
     `).join('');
-    document.getElementById('fundTableBody').innerHTML = html;
 }
 
-// --- UTILS ---
-const toBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
+const toBase64 = f => new Promise((res, rej) => {
+    const r = new FileReader(); r.readAsDataURL(f);
+    r.onload = () => res(r.result); r.onerror = rej;
 });
 
 function resetMatchForm() {
-    document.getElementById('editMatchKey').value = "";
-    document.getElementById('mDate').value = "";
-    document.getElementById('mTeams').value = "";
-    document.getElementById('mScore').value = "";
+    document.getElementById('editMatchKey').value = ""; document.getElementById('mDate').value = "";
+    document.getElementById('mTeams').value = ""; document.getElementById('mScore').value = "";
     document.getElementById('matchFormTitle').textContent = "➕ Thêm trận mới";
 }
 
-// Tab logic
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.onclick = () => {
-        document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(btn.dataset.tab).classList.add('active');
-    };
+document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => {
+    document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
+    b.classList.add('active'); document.getElementById(b.dataset.tab).classList.add('active');
 });
 </script>
 </body>
