@@ -1,456 +1,1040 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐯 NCC 🐆 v4.0 Pro</title>
-    <style>
-        :root {
-            --orange: #FF7F00;
-            --orange-dark: #e06e00;
-            --bg: #f8f9fa;
-            --green: #28a745;
-            --red: #dc3545;
-            --purple-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NCC 100K Realtime V1</title>
+  <style>
+    :root {
+      --orange: #ff7f00;
+      --orange-dark: #e66f00;
+      --bg: #f5f6f8;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --green: #16a34a;
+      --red: #dc2626;
+      --blue: #2563eb;
+      --border: #e5e7eb;
+    }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--purple-grad);
-            min-height: 100vh; padding: 20px;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        .container {
-            max-width: 1200px; margin: 0 auto; background: white;
-            border-radius: 15px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;
-        }
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 80px;
+    }
 
-        header {
-            background: linear-gradient(135deg, #FF7F00, #FF6B35);
-            color: white; padding: 40px 20px; text-align: center; position: relative;
-        }
+    header {
+      background: linear-gradient(135deg, #ff7f00, #ffb347);
+      color: white;
+      padding: 22px 16px;
+      text-align: center;
+    }
 
-        .auth-btn {
-            position: absolute; top: 15px; right: 20px;
-            padding: 8px 16px; background: rgba(255,255,255,0.2); color: white;
-            border: 1px solid white; border-radius: 20px; cursor: pointer;
-            font-size: 0.85em; font-weight: bold; transition: all 0.3s;
-        }
+    header h1 {
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
 
-        .nav-tabs {
-            display: flex; background: #f8f9fa; border-bottom: 2px solid #ddd;
-            flex-wrap: wrap; position: sticky; top: 0; z-index: 100;
-        }
+    header p {
+      font-size: 14px;
+      opacity: 0.95;
+    }
 
-        .nav-tabs button {
-            flex: 1; padding: 13px 10px; border: none; background: none;
-            cursor: pointer; font-size: 0.92em; font-weight: 600; color: #555;
-            transition: all 0.3s; border-bottom: 3px solid transparent; min-width: 100px;
-        }
+    .tabs {
+      display: flex;
+      overflow-x: auto;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
 
-        .nav-tabs button.active { color: var(--orange); border-bottom-color: var(--orange); background: white; }
+    .tab-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 14px 10px;
+      border: none;
+      background: white;
+      color: var(--muted);
+      font-weight: bold;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+    }
 
-        .content { padding: 30px; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .tab-btn.active {
+      color: var(--orange);
+      border-bottom-color: var(--orange);
+    }
 
-        .stats-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
-        .stat-box {
-            background: var(--purple-grad); color: white;
-            padding: 20px; border-radius: 10px; flex: 1; min-width: 130px; text-align: center;
-        }
+    main {
+      max-width: 1000px;
+      margin: auto;
+      padding: 16px;
+    }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: var(--orange); color: white; padding: 14px 12px; text-align: left; }
-        td { padding: 11px 12px; border-bottom: 1px solid #eee; }
+    .tab {
+      display: none;
+    }
 
-        .user-avatar {
-            width: 35px; height: 35px; border-radius: 50%; 
-            object-fit: cover; vertical-align: middle; margin-right: 8px;
-            border: 2px solid var(--orange);
-        }
+    .tab.active {
+      display: block;
+    }
 
-        .add-form {
-            background: #f0f7ff; border: 1px solid #b3d4f5;
-            border-radius: 10px; padding: 18px; margin-bottom: 20px;
-        }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
 
-        .form-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-        .form-row input, .form-row select {
-            flex: 1; min-width: 140px; padding: 9px 12px;
-            border: 1px solid #ccc; border-radius: 6px;
-        }
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
 
-        .btn {
-            padding: 10px 20px; background: var(--orange); color: white;
-            border: none; border-radius: 5px; cursor: pointer; font-weight: 600;
-        }
+    .stat {
+      border-left: 5px solid var(--orange);
+    }
 
-        .btn-green { background: var(--green); }
-        .btn-danger { background: var(--red); }
+    .stat .label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
 
-        .modal {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-            z-index: 10000; align-items: center; justify-content: center;
-        }
-        .modal.active { display: flex; }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; }
+    .stat .value {
+      font-size: 24px;
+      font-weight: bold;
+    }
 
-        .summary-card { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 12px 0; border-left: 5px solid var(--orange); }
+    h2 {
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
 
-        .diary-post { margin-bottom: 20px; border: 1px solid #ddd; border-radius: 10px; overflow: hidden; background: #fff; }
-        .diary-img { width: 100%; max-height: 400px; object-fit: cover; display: block; }
-        .diary-body { padding: 15px; }
+    h3 {
+      margin-bottom: 10px;
+      font-size: 17px;
+    }
 
-        #loadingOverlay {
-            position: fixed; inset: 0; background: white;
-            display: flex; align-items: center; justify-content: center; z-index: 9999;
-        }
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
 
-        .toast {
-            position: fixed; bottom: 20px; right: 20px; background: #333; color: white;
-            padding: 12px 20px; border-radius: 10px; display: none; z-index: 10001;
-        }
-        .toast.show { display: block; }
-    </style>
+    input, select {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      background: white;
+      margin-bottom: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .btn-primary {
+      background: var(--orange);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--orange-dark);
+    }
+
+    .btn-blue {
+      background: var(--blue);
+      color: white;
+    }
+
+    .btn-red {
+      background: var(--red);
+      color: white;
+    }
+
+    .btn-green {
+      background: var(--green);
+      color: white;
+    }
+
+    .btn-full {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: white;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    th {
+      background: #fff7ed;
+      color: #9a3412;
+      font-size: 13px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .win {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .loss {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      background: #111827;
+      color: white;
+      padding: 14px;
+      border-radius: 12px;
+      display: none;
+      z-index: 99;
+      text-align: center;
+    }
+
+    .danger-note {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .small-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 12px;
+      }
+
+      th, td {
+        padding: 8px;
+        font-size: 13px;
+      }
+
+      header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <h1>🏓 NCC 100K</h1>
+    <p>Quản lý Pickleball realtime: trận đơn, trận đôi, ELO, quỹ thua</p>
+  </header>
 
-<div id="loadingOverlay"><b>Đang kết nối hệ thống...</b></div>
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="showTab('dashboard', this)">Dashboard</button>
+    <button class="tab-btn" onclick="showTab('matches', this)">Trận đấu</button>
+    <button class="tab-btn" onclick="showTab('ranking', this)">Xếp hạng</button>
+    <button class="tab-btn" onclick="showTab('fund', this)">Quỹ</button>
+    <button class="tab-btn" onclick="showTab('settings', this)">Cài đặt</button>
+  </nav>
 
-<div class="container">
-    <header>
-        <h1>🐯 NCC 🐆 v4.0</h1>
-        <p>Hệ thống quản lý Pickleball đồng bộ Real-time</p>
-        <div id="userInfo" style="margin-top:10px;"></div>
-        <button class="auth-btn" id="authBtn" onclick="toggleAuthModal()">🔑 Đăng nhập</button>
-    </header>
-
-    <div class="nav-tabs">
-        <button class="tab-btn active" data-tab="dashboard">📊 Tổng quan</button>
-        <button class="tab-btn" data-tab="matches">⚡ Trận đấu</button>
-        <button class="tab-btn" data-tab="fund">💰 Quỹ CLB</button>
-        <button class="tab-btn" data-tab="diary">📸 Nhật ký</button>
-        <button class="tab-btn" data-tab="settings">⚙️ Cài đặt</button>
-    </div>
-
-    <div class="content">
-        <!-- DASHBOARD -->
-        <div class="tab-content active" id="dashboard">
-            <div class="stats-grid">
-                <div class="stat-box"><h3 id="statMatches">0</h3><p>Trận đấu</p></div>
-                <div class="stat-box"><h3 id="statFund">0</h3><p>Quỹ (VNĐ)</p></div>
-            </div>
-            <h3>🏆 Bảng xếp hạng thành viên</h3>
-            <table id="rankTable">
-                <thead><tr><th>Thành viên</th><th>Trận</th><th>Thắng</th><th>Thua</th><th>Điểm</th></tr></thead>
-                <tbody></tbody>
-            </table>
+  <main>
+    <section id="dashboard" class="tab active">
+      <div class="grid">
+        <div class="card stat">
+          <div class="label">Tổng thành viên</div>
+          <div class="value" id="totalMembers">0</div>
         </div>
-
-        <!-- MATCHES -->
-        <div class="tab-content" id="matches">
-            <div class="add-form" id="addMatchForm" style="display:none;">
-                <h3 id="matchFormTitle">➕ Thêm trận mới</h3>
-                <input type="hidden" id="editMatchKey">
-                <div class="form-row">
-                    <input type="text" id="mDate" placeholder="Ngày (26/04)">
-                    <input type="text" id="mTeams" placeholder="Cặp đấu (A+B vs C+D)">
-                    <input type="text" id="mScore" placeholder="Tỷ số (11-5)">
-                    <button class="btn btn-green" id="btnSaveMatch" onclick="saveMatch()">💾 Lưu</button>
-                </div>
-            </div>
-            <div id="matchesList"></div>
+        <div class="card stat">
+          <div class="label">Trận đơn</div>
+          <div class="value" id="totalSingle">0</div>
         </div>
-
-        <!-- FUND -->
-        <div class="tab-content" id="fund">
-            <h2>💰 Chi tiết đóng quỹ</h2>
-            <table>
-                <thead><tr><th>Thành viên</th><th>Trận thua</th><th>Tổng nộp</th></tr></thead>
-                <tbody id="fundTableBody"></tbody>
-            </table>
+        <div class="card stat">
+          <div class="label">Trận đôi</div>
+          <div class="value" id="totalDouble">0</div>
         </div>
-
-        <!-- DIARY -->
-        <div class="tab-content" id="diary">
-            <div class="add-form" id="diaryForm" style="display:none;">
-                <h3>📸 Chia sẻ khoảnh khắc</h3>
-                <input type="text" id="diaryTitle" placeholder="Tiêu đề cảm xúc..." style="width:100%; margin:10px 0; padding:10px; border-radius:5px; border:1px solid #ccc;">
-                <input type="file" id="diaryImg" accept="image/*" onchange="previewImg(event)" style="margin-bottom:10px;">
-                <div id="imgPreviewContainer" style="margin-bottom:10px;"></div>
-                <button class="btn btn-green" id="btnPostDiary" onclick="postDiary()">🚀 Đăng bài</button>
-            </div>
-            <div id="diaryFeed"></div>
+        <div class="card stat">
+          <div class="label">Tổng quỹ</div>
+          <div class="value" id="totalFund">0đ</div>
         </div>
+      </div>
 
-        <!-- SETTINGS -->
-        <div class="tab-content" id="settings">
-            <div class="summary-card" id="profileCard" style="display:none;">
-                <h3>👤 Hồ sơ cá nhân</h3>
-                <div class="form-row">
-                    <input type="text" id="profileName" placeholder="Tên hiển thị mới">
-                    <label>Đổi ảnh: <input type="file" id="profileAvatar" accept="image/*"></label>
-                    <button class="btn" onclick="updateProfile()">Cập nhật</button>
-                </div>
-            </div>
+      <div class="card">
+        <h2>🏆 Thành tích nổi bật</h2>
+        <div id="topPlayers"></div>
+      </div>
 
-            <div class="summary-card" id="adminCard" style="display:none;">
-                <h3>👥 Quản lý thành viên (Admin)</h3>
-                <div class="form-row">
-                    <input type="text" id="newUsername" placeholder="Tên đăng nhập">
-                    <input type="text" id="newPassword" placeholder="Mật khẩu">
-                    <input type="text" id="newFullName" placeholder="Họ tên">
-                    <button class="btn btn-green" onclick="adminAddUser()">➕ Thêm</button>
-                </div>
-            </div>
+      <div class="card">
+        <h2>📌 Trận gần đây</h2>
+        <div id="recentMatches"></div>
+      </div>
+    </section>
+
+    <section id="matches" class="tab">
+      <div class="card">
+        <h2>🎾 Thêm trận đơn</h2>
+        <div class="form-grid">
+          <div>
+            <label>Ngày chơi</label>
+            <input type="date" id="singleDate">
+          </div>
+          <div>
+            <label>VĐV X</label>
+            <select id="singleX"></select>
+          </div>
+          <div>
+            <label>VĐV Y</label>
+            <select id="singleY"></select>
+          </div>
+          <div>
+            <label>Điểm X</label>
+            <select id="singleScoreX"></select>
+          </div>
+          <div>
+            <label>Điểm Y</label>
+            <select id="singleScoreY"></select>
+          </div>
         </div>
-    </div>
-</div>
+        <button class="btn-primary btn-full" onclick="addSingleMatch()">Lưu trận đơn</button>
+      </div>
 
-<div class="modal" id="authModal">
-    <div class="modal-content">
-        <h2 style="margin-bottom:15px;">🔐 Đăng nhập</h2>
-        <input type="text" id="loginUser" placeholder="Tên đăng nhập" style="width:100%; padding:10px; margin-bottom:10px;">
-        <input type="password" id="loginPass" placeholder="Mật khẩu" style="width:100%; padding:10px; margin-bottom:15px;">
-        <button class="btn btn-green" style="width:100%;" onclick="login()">Đăng nhập</button>
-        <button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="toggleAuthModal()">Đóng</button>
-    </div>
-</div>
+      <div class="card">
+        <h2>👥 Thêm trận đôi</h2>
+        <div class="form-grid">
+          <div>
+            <label>Ngày chơi</label>
+            <input type="date" id="doubleDate">
+          </div>
+          <div>
+            <label>Đội 1 - A</label>
+            <select id="doubleA"></select>
+          </div>
+          <div>
+            <label>Đội 1 - B</label>
+            <select id="doubleB"></select>
+          </div>
+          <div>
+            <label>Đội 2 - C</label>
+            <select id="doubleC"></select>
+          </div>
+          <div>
+            <label>Đội 2 - D</label>
+            <select id="doubleD"></select>
+          </div>
+          <div>
+            <label>Điểm AB</label>
+            <select id="doubleScoreAB"></select>
+          </div>
+          <div>
+            <label>Điểm CD</label>
+            <select id="doubleScoreCD"></select>
+          </div>
+        </div>
+        <button class="btn-primary btn-full" onclick="addDoubleMatch()">Lưu trận đôi</button>
+      </div>
 
-<div class="toast" id="toast"></div>
+      <div class="card">
+        <h2>📋 Lịch sử trận đấu</h2>
+        <div id="matchHistory"></div>
+      </div>
+    </section>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue, set, push, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    <section id="ranking" class="tab">
+      <div class="card">
+        <h2>🏅 Bảng xếp hạng ELO</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Hạng</th>
+                <th>Thành viên</th>
+                <th>ELO</th>
+                <th>Trận</th>
+                <th>Thắng</th>
+                <th>Thua</th>
+                <th>Tỷ lệ</th>
+                <th>Nợ quỹ</th>
+              </tr>
+            </thead>
+            <tbody id="rankingBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-const firebaseConfig = {
-    apiKey: "AIzaSyAnuIkzH6ADIba2S4GZyMospCttPf_-riE",
-    authDomain: "ncc-100k.firebaseapp.com",
-    databaseURL: "https://ncc-100k-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "ncc-100k",
-    storageBucket: "ncc-100k.firebasestorage.app",
-    messagingSenderId: "976246915002",
-    appId: "1:976246915002:web:8032dbc912ce6ae904e783"
-};
+    <section id="fund" class="tab">
+      <div class="card">
+        <h2>💰 Quỹ CLB</h2>
+        <div class="grid">
+          <div class="card stat">
+            <div class="label">Tổng quỹ thua</div>
+            <div class="value" id="fundTotalBox">0đ</div>
+          </div>
+          <div class="card stat">
+            <div class="label">Mức quỹ / 1 trận thua</div>
+            <div class="value">100K</div>
+          </div>
+        </div>
+      </div>
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+      <div class="card">
+        <h2>📌 Công nợ thành viên</h2>
+        <div id="debtList"></div>
+      </div>
 
-let currentUser = JSON.parse(localStorage.getItem('ncc_user') || 'null');
-let usersData = {};
-let matchesData = [];
-let membersData = [];
-let diaryData = [];
+      <div class="card">
+        <h2>🧾 Lịch sử quỹ</h2>
+        <div id="fundHistory"></div>
+      </div>
+    </section>
 
-const showToast = (msg) => {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-};
+    <section id="settings" class="tab">
+      <div class="card">
+        <h2>⚙️ Khởi tạo dữ liệu</h2>
+        <div class="danger-note">
+          Chỉ bấm nút này lần đầu tiên khi database còn trống. Hệ thống sẽ tạo 10 thành viên ban đầu với ELO 1000.
+        </div>
+        <button class="btn-blue btn-full" onclick="initMembers()">Khởi tạo thành viên ban đầu</button>
+      </div>
 
-const esc = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      <div class="card">
+        <h2>👤 Thêm thành viên mới</h2>
+        <label>Tên thành viên</label>
+        <input id="newMemberName" placeholder="Nhập tên thành viên">
+        <button class="btn-green btn-full" onclick="addMember()">Thêm thành viên</button>
+      </div>
+    </section>
+  </main>
 
-// SYNC
-onValue(ref(db, '/'), snap => {
-    const data = snap.val() || {};
-    usersData = data.users || {};
-    matchesData = data.matches ? Object.entries(data.matches).map(([k,v])=>({...v, _key: k})) : [];
-    membersData = data.members || [];
-    diaryData = data.diary ? Object.entries(data.diary).map(([k,v])=>({...v, _key: k})) : [];
-    
-    renderAll();
-    document.getElementById('loadingOverlay').style.display = 'none';
-});
+  <div class="toast" id="toast"></div>
 
-function renderAll() {
-    updateAuthUI();
-    renderDashboard();
-    renderMatches();
-    renderFund();
-    renderDiaryFeed();
-}
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      addDoc,
+      getDoc,
+      getDocs,
+      updateDoc,
+      onSnapshot,
+      serverTimestamp,
+      runTransaction,
+      query,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-// AUTH
-window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('active');
-
-window.login = () => {
-    const u = document.getElementById('loginUser').value.trim();
-    const p = document.getElementById('loginPass').value;
-    const found = Object.values(usersData).find(x => x.username === u && x.password === p);
-    
-    if (found) {
-        currentUser = found;
-        localStorage.setItem('ncc_user', JSON.stringify(found));
-        toggleAuthModal();
-        showToast("Chào mừng " + found.name);
-        renderAll();
-    } else { alert("Sai tài khoản hoặc mật khẩu!"); }
-};
-
-window.logout = () => {
-    localStorage.removeItem('ncc_user');
-    currentUser = null;
-    location.reload();
-};
-
-function updateAuthUI() {
-    const info = document.getElementById('userInfo');
-    const btn = document.getElementById('authBtn');
-    if (currentUser) {
-        const myData = usersData[currentUser.username] || currentUser;
-        info.innerHTML = `<img src="${myData.avatar || 'https://via.placeholder.com/50'}" class="user-avatar"> <b>${myData.name}</b>`;
-        btn.textContent = "🚪 Thoát";
-        btn.onclick = logout;
-        document.getElementById('addMatchForm').style.display = 'block';
-        document.getElementById('diaryForm').style.display = 'block';
-        document.getElementById('profileCard').style.display = 'block';
-        if (myData.isAdmin) document.getElementById('adminCard').style.display = 'block';
-    } else {
-        info.innerHTML = "";
-        btn.textContent = "🔑 Đăng nhập";
-        btn.onclick = toggleAuthModal;
-    }
-}
-
-// ADMIN & PROFILE
-window.adminAddUser = () => {
-    const u = document.getElementById('newUsername').value.trim();
-    const p = document.getElementById('newPassword').value;
-    const n = document.getElementById('newFullName').value.trim();
-    if (!u || !p || !n) return alert("Nhập đủ thông tin!");
-    update(ref(db, 'users/' + u), { username: u, password: p, name: n, isAdmin: false }).then(() => {
-        const newList = [...membersData, { name: n, matches: 0, wins: 0, losses: 0 }];
-        set(ref(db, 'members'), newList);
-        showToast("Đã thêm thành viên!");
-    });
-};
-
-window.updateProfile = async () => {
-    const newName = document.getElementById('profileName').value.trim();
-    const file = document.getElementById('profileAvatar').files[0];
-    let updates = {};
-    if (newName) updates.name = newName;
-    if (file) updates.avatar = await toBase64(file);
-    if (Object.keys(updates).length > 0) {
-        update(ref(db, 'users/' + currentUser.username), updates).then(() => {
-            currentUser = {...currentUser, ...updates};
-            localStorage.setItem('ncc_user', JSON.stringify(currentUser));
-            showToast("Đã cập nhật!");
-        });
-    }
-};
-
-// MATCHES
-window.saveMatch = () => {
-    const key = document.getElementById('editMatchKey').value;
-    const data = {
-        date: document.getElementById('mDate').value,
-        teams: document.getElementById('mTeams').value,
-        score: document.getElementById('mScore').value,
-        by: currentUser.name
+    const firebaseConfig = {
+      apiKey: "AIzaSyDyYgyMbobcK_h8CbMdVNa06ZKNAlMcr_I",
+      authDomain: "ncc-100k-c363b.firebaseapp.com",
+      databaseURL: "https://ncc-100k-c363b-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "ncc-100k-c363b",
+      storageBucket: "ncc-100k-c363b.firebasestorage.app",
+      messagingSenderId: "279305555364",
+      appId: "1:279305555364:web:5645d7c06852f52c004531",
+      measurementId: "G-JLYC3QP307"
     };
-    if (key) update(ref(db, 'matches/' + key), data).then(() => showToast("Đã cập nhật!"));
-    else push(ref(db, 'matches'), data).then(() => showToast("Đã thêm trận!"));
-    resetMatchForm();
-};
 
-window.editMatch = (key) => {
-    const m = matchesData.find(x => x._key === key);
-    document.getElementById('editMatchKey').value = key;
-    document.getElementById('mDate').value = m.date;
-    document.getElementById('mTeams').value = m.teams;
-    document.getElementById('mScore').value = m.score;
-    document.getElementById('matchFormTitle').textContent = "✏️ Sửa trận đấu";
-    window.scrollTo(0,0);
-};
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-// DIARY
-window.previewImg = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const base64 = await toBase64(file);
-        document.getElementById('imgPreviewContainer').innerHTML = `<img src="${base64}" style="width:100%; border-radius:5px;">`;
+    const LOSS_FUND = 100000;
+    const START_ELO = 1000;
+    const K_FACTOR = 32;
+
+    let members = [];
+    let matches = [];
+    let fundLogs = [];
+
+    const initialMembers = [
+      "Hiếu",
+      "Huyền",
+      "Lan",
+      "Hoàng",
+      "Tùng",
+      "Hiền",
+      "Chiến",
+      "Thạnh",
+      "Hiển",
+      "Khách"
+    ];
+
+    function todayISO() {
+      return new Date().toISOString().slice(0, 10);
     }
-};
 
-window.postDiary = async () => {
-    const title = document.getElementById('diaryTitle').value.trim();
-    const file = document.getElementById('diaryImg').files[0];
-    if (!title || !file) return alert("Vui lòng nhập tiêu đề và chọn ảnh!");
-    
-    document.getElementById('btnPostDiary').disabled = true;
-    const imgBase64 = await toBase64(file);
-    push(ref(db, 'diary'), {
-        title, img: imgBase64, user: currentUser.name, avatar: usersData[currentUser.username]?.avatar || '', date: new Date().toLocaleString('vi-VN')
-    }).then(() => {
-        showToast("Đã đăng nhật ký!");
-        document.getElementById('diaryTitle').value = "";
-        document.getElementById('diaryImg').value = "";
-        document.getElementById('imgPreviewContainer').innerHTML = "";
-        document.getElementById('btnPostDiary').disabled = false;
+    function money(value) {
+      return Number(value || 0).toLocaleString("vi-VN") + "đ";
+    }
+
+    function memberId(name) {
+      return name
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+    }
+
+    function toast(message) {
+      const el = document.getElementById("toast");
+      el.textContent = message;
+      el.style.display = "block";
+      setTimeout(() => el.style.display = "none", 2600);
+    }
+
+    function fillScores() {
+      const ids = ["singleScoreX", "singleScoreY", "doubleScoreAB", "doubleScoreCD"];
+      ids.forEach(id => {
+        const select = document.getElementById(id);
+        select.innerHTML = "";
+        for (let i = 0; i <= 15; i++) {
+          select.innerHTML += `<option value="${i}">${i}</option>`;
+        }
+      });
+      document.getElementById("singleScoreX").value = 15;
+      document.getElementById("singleScoreY").value = 0;
+      document.getElementById("doubleScoreAB").value = 15;
+      document.getElementById("doubleScoreCD").value = 0;
+    }
+
+    function fillDates() {
+      document.getElementById("singleDate").value = todayISO();
+      document.getElementById("doubleDate").value = todayISO();
+    }
+
+    function fillMemberSelects() {
+      const ids = ["singleX", "singleY", "doubleA", "doubleB", "doubleC", "doubleD"];
+      const options = members.map(m => `<option value="${m.id}">${m.name}</option>`).join("");
+
+      ids.forEach(id => {
+        const old = document.getElementById(id).value;
+        document.getElementById(id).innerHTML = options;
+        if (old) document.getElementById(id).value = old;
+      });
+
+      if (members.length >= 4) {
+        document.getElementById("singleX").selectedIndex = 0;
+        document.getElementById("singleY").selectedIndex = 1;
+        document.getElementById("doubleA").selectedIndex = 0;
+        document.getElementById("doubleB").selectedIndex = 1;
+        document.getElementById("doubleC").selectedIndex = 2;
+        document.getElementById("doubleD").selectedIndex = 3;
+      }
+    }
+
+    function getMemberName(id) {
+      const m = members.find(x => x.id === id);
+      return m ? m.name : id;
+    }
+
+    function expectedScore(playerElo, opponentElo) {
+      return 1 / (1 + Math.pow(10, (opponentElo - playerElo) / 400));
+    }
+
+    function eloDelta(playerElo, opponentElo, result) {
+      const expected = expectedScore(playerElo, opponentElo);
+      return Math.round(K_FACTOR * (result - expected));
+    }
+
+    async function initMembers() {
+      try {
+        for (const name of initialMembers) {
+          const id = memberId(name);
+          const ref = doc(db, "members", id);
+          const snap = await getDoc(ref);
+
+          if (!snap.exists()) {
+            await setDoc(ref, {
+              name,
+              elo: START_ELO,
+              matches: 0,
+              wins: 0,
+              losses: 0,
+              fundDebt: 0,
+              createdAt: serverTimestamp()
+            });
+          }
+        }
+        toast("Đã khởi tạo thành viên ban đầu");
+      } catch (error) {
+        console.error(error);
+        toast("Lỗi khởi tạo dữ liệu");
+      }
+    }
+
+    async function addMember() {
+      const name = document.getElementById("newMemberName").value.trim();
+      if (!name) {
+        toast("Vui lòng nhập tên thành viên");
+        return;
+      }
+
+      try {
+        const id = memberId(name);
+        const ref = doc(db, "members", id);
+        const snap = await getDoc(ref);
+
+        if (snap.exists()) {
+          toast("Thành viên đã tồn tại");
+          return;
+        }
+
+        await setDoc(ref, {
+          name,
+          elo: START_ELO,
+          matches: 0,
+          wins: 0,
+          losses: 0,
+          fundDebt: 0,
+          createdAt: serverTimestamp()
+        });
+
+        document.getElementById("newMemberName").value = "";
+        toast("Đã thêm thành viên");
+      } catch (error) {
+        console.error(error);
+        toast("Lỗi thêm thành viên");
+      }
+    }
+
+    async function addSingleMatch() {
+      const date = document.getElementById("singleDate").value;
+      const xId = document.getElementById("singleX").value;
+      const yId = document.getElementById("singleY").value;
+      const scoreX = Number(document.getElementById("singleScoreX").value);
+      const scoreY = Number(document.getElementById("singleScoreY").value);
+
+      if (!date || !xId || !yId) {
+        toast("Vui lòng nhập đủ thông tin");
+        return;
+      }
+
+      if (xId === yId) {
+        toast("Hai vận động viên không được trùng nhau");
+        return;
+      }
+
+      if (scoreX === scoreY) {
+        toast("Trận đấu không được hòa");
+        return;
+      }
+
+      const winnerId = scoreX > scoreY ? xId : yId;
+      const loserId = scoreX > scoreY ? yId : xId;
+
+      try {
+        await runTransaction(db, async (transaction) => {
+          const xRef = doc(db, "members", xId);
+          const yRef = doc(db, "members", yId);
+
+          const xSnap = await transaction.get(xRef);
+          const ySnap = await transaction.get(yRef);
+
+          if (!xSnap.exists() || !ySnap.exists()) {
+            throw new Error("Không tìm thấy thành viên");
+          }
+
+          const x = xSnap.data();
+          const y = ySnap.data();
+
+          const xResult = winnerId === xId ? 1 : 0;
+          const yResult = winnerId === yId ? 1 : 0;
+
+          const xDelta = eloDelta(x.elo, y.elo, xResult);
+          const yDelta = eloDelta(y.elo, x.elo, yResult);
+
+          transaction.update(xRef, {
+            elo: x.elo + xDelta,
+            matches: (x.matches || 0) + 1,
+            wins: (x.wins || 0) + (winnerId === xId ? 1 : 0),
+            losses: (x.losses || 0) + (loserId === xId ? 1 : 0),
+            fundDebt: (x.fundDebt || 0) + (loserId === xId ? LOSS_FUND : 0)
+          });
+
+          transaction.update(yRef, {
+            elo: y.elo + yDelta,
+            matches: (y.matches || 0) + 1,
+            wins: (y.wins || 0) + (winnerId === yId ? 1 : 0),
+            losses: (y.losses || 0) + (loserId === yId ? 1 : 0),
+            fundDebt: (y.fundDebt || 0) + (loserId === yId ? LOSS_FUND : 0)
+          });
+
+          const matchRef = doc(collection(db, "matches"));
+          transaction.set(matchRef, {
+            type: "single",
+            date,
+            xId,
+            yId,
+            xName: x.name,
+            yName: y.name,
+            scoreX,
+            scoreY,
+            winnerIds: [winnerId],
+            loserIds: [loserId],
+            eloChange: {
+              [xId]: xDelta,
+              [yId]: yDelta
+            },
+            fundAdded: LOSS_FUND,
+            createdAt: serverTimestamp()
+          });
+
+          const fundRef = doc(collection(db, "fundLogs"));
+          transaction.set(fundRef, {
+            type: "loss_fund",
+            matchType: "single",
+            date,
+            amount: LOSS_FUND,
+            payerIds: [loserId],
+            payerNames: [loserId === xId ? x.name : y.name],
+            note: "Quỹ thua trận đơn",
+            createdAt: serverTimestamp()
+          });
+        });
+
+        toast("Đã lưu trận đơn");
+      } catch (error) {
+        console.error(error);
+        toast("Lỗi lưu trận đơn");
+      }
+    }
+
+    async function addDoubleMatch() {
+      const date = document.getElementById("doubleDate").value;
+      const aId = document.getElementById("doubleA").value;
+      const bId = document.getElementById("doubleB").value;
+      const cId = document.getElementById("doubleC").value;
+      const dId = document.getElementById("doubleD").value;
+      const scoreAB = Number(document.getElementById("doubleScoreAB").value);
+      const scoreCD = Number(document.getElementById("doubleScoreCD").value);
+
+      const ids = [aId, bId, cId, dId];
+
+      if (!date || ids.some(id => !id)) {
+        toast("Vui lòng nhập đủ thông tin");
+        return;
+      }
+
+      if (new Set(ids).size !== 4) {
+        toast("4 vị trí A, B, C, D không được trùng nhau");
+        return;
+      }
+
+      if (scoreAB === scoreCD) {
+        toast("Trận đấu không được hòa");
+        return;
+      }
+
+      const team1Win = scoreAB > scoreCD;
+      const winnerIds = team1Win ? [aId, bId] : [cId, dId];
+      const loserIds = team1Win ? [cId, dId] : [aId, bId];
+
+      try {
+        await runTransaction(db, async (transaction) => {
+          const refs = {};
+          const data = {};
+
+          for (const id of ids) {
+            refs[id] = doc(db, "members", id);
+            const snap = await transaction.get(refs[id]);
+            if (!snap.exists()) throw new Error("Không tìm thấy thành viên");
+            data[id] = snap.data();
+          }
+
+          const team1Elo = (data[aId].elo + data[bId].elo) / 2;
+          const team2Elo = (data[cId].elo + data[dId].elo) / 2;
+
+          const team1Result = team1Win ? 1 : 0;
+          const team2Result = team1Win ? 0 : 1;
+
+          const team1Delta = eloDelta(team1Elo, team2Elo, team1Result);
+          const team2Delta = eloDelta(team2Elo, team1Elo, team2Result);
+
+          for (const id of [aId, bId]) {
+            const isWinner = winnerIds.includes(id);
+            const isLoser = loserIds.includes(id);
+
+            transaction.update(refs[id], {
+              elo: data[id].elo + team1Delta,
+              matches: (data[id].matches || 0) + 1,
+              wins: (data[id].wins || 0) + (isWinner ? 1 : 0),
+              losses: (data[id].losses || 0) + (isLoser ? 1 : 0),
+              fundDebt: (data[id].fundDebt || 0) + (isLoser ? LOSS_FUND : 0)
+            });
+          }
+
+          for (const id of [cId, dId]) {
+            const isWinner = winnerIds.includes(id);
+            const isLoser = loserIds.includes(id);
+
+            transaction.update(refs[id], {
+              elo: data[id].elo + team2Delta,
+              matches: (data[id].matches || 0) + 1,
+              wins: (data[id].wins || 0) + (isWinner ? 1 : 0),
+              losses: (data[id].losses || 0) + (isLoser ? 1 : 0),
+              fundDebt: (data[id].fundDebt || 0) + (isLoser ? LOSS_FUND : 0)
+            });
+          }
+
+          const matchRef = doc(collection(db, "matches"));
+          transaction.set(matchRef, {
+            type: "double",
+            date,
+            aId,
+            bId,
+            cId,
+            dId,
+            aName: data[aId].name,
+            bName: data[bId].name,
+            cName: data[cId].name,
+            dName: data[dId].name,
+            scoreAB,
+            scoreCD,
+            winnerIds,
+            loserIds,
+            eloChange: {
+              [aId]: team1Delta,
+              [bId]: team1Delta,
+              [cId]: team2Delta,
+              [dId]: team2Delta
+            },
+            fundAdded: LOSS_FUND * 2,
+            createdAt: serverTimestamp()
+          });
+
+          const fundRef = doc(collection(db, "fundLogs"));
+          transaction.set(fundRef, {
+            type: "loss_fund",
+            matchType: "double",
+            date,
+            amount: LOSS_FUND * 2,
+            payerIds: loserIds,
+            payerNames: loserIds.map(id => data[id].name),
+            note: "Quỹ thua trận đôi",
+            createdAt: serverTimestamp()
+          });
+        });
+
+        toast("Đã lưu trận đôi");
+      } catch (error) {
+        console.error(error);
+        toast("Lỗi lưu trận đôi");
+      }
+    }
+
+    function renderDashboard() {
+      const singleCount = matches.filter(m => m.type === "single").length;
+      const doubleCount = matches.filter(m => m.type === "double").length;
+      const totalFund = fundLogs.reduce((sum, f) => sum + Number(f.amount || 0), 0);
+
+      document.getElementById("totalMembers").textContent = members.length;
+      document.getElementById("totalSingle").textContent = singleCount;
+      document.getElementById("totalDouble").textContent = doubleCount;
+      document.getElementById("totalFund").textContent = money(totalFund);
+      document.getElementById("fundTotalBox").textContent = money(totalFund);
+
+      const sorted = [...members].sort((a, b) => {
+        if ((b.elo || 0) !== (a.elo || 0)) return (b.elo || 0) - (a.elo || 0);
+        return (b.wins || 0) - (a.wins || 0);
+      });
+
+      document.getElementById("topPlayers").innerHTML = sorted.slice(0, 3).map((m, i) => {
+        return `<p style="margin:8px 0;"><b>#${i + 1} ${m.name}</b> — ELO ${m.elo || START_ELO}, thắng ${m.wins || 0}/${m.matches || 0}</p>`;
+      }).join("") || `<p class="muted">Chưa có dữ liệu.</p>`;
+
+      document.getElementById("recentMatches").innerHTML = matches.slice(0, 5).map(renderMatchItem).join("") || `<p class="muted">Chưa có trận đấu.</p>`;
+    }
+
+    function renderRanking() {
+      const sorted = [...members].sort((a, b) => {
+        if ((b.elo || 0) !== (a.elo || 0)) return (b.elo || 0) - (a.elo || 0);
+
+        const rateA = a.matches ? a.wins / a.matches : 0;
+        const rateB = b.matches ? b.wins / b.matches : 0;
+
+        if (rateB !== rateA) return rateB - rateA;
+        return (b.matches || 0) - (a.matches || 0);
+      });
+
+      document.getElementById("rankingBody").innerHTML = sorted.map((m, index) => {
+        const rate = m.matches ? Math.round((m.wins / m.matches) * 100) : 0;
+        return `
+          <tr>
+            <td><b>${index + 1}</b></td>
+            <td><b>${m.name}</b></td>
+            <td>${m.elo || START_ELO}</td>
+            <td>${m.matches || 0}</td>
+            <td>${m.wins || 0}</td>
+            <td>${m.losses || 0}</td>
+            <td>${rate}%</td>
+            <td>${money(m.fundDebt || 0)}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderFund() {
+      const debtSorted = [...members].sort((a, b) => (b.fundDebt || 0) - (a.fundDebt || 0));
+
+      document.getElementById("debtList").innerHTML = debtSorted.map(m => {
+        return `<p style="margin:8px 0;"><b>${m.name}</b>: ${money(m.fundDebt || 0)}</p>`;
+      }).join("") || `<p class="muted">Chưa có công nợ.</p>`;
+
+      document.getElementById("fundHistory").innerHTML = fundLogs.map(f => {
+        return `
+          <div style="padding:10px 0;border-bottom:1px solid #eee;">
+            <b>${f.date || ""}</b> — ${money(f.amount || 0)}
+            <br>
+            <span class="muted">${(f.payerNames || []).join(", ")} • ${f.note || ""}</span>
+          </div>
+        `;
+      }).join("") || `<p class="muted">Chưa có lịch sử quỹ.</p>`;
+    }
+
+    function renderMatchItem(m) {
+      if (m.type === "single") {
+        const xWin = m.winnerIds && m.winnerIds.includes(m.xId);
+        return `
+          <div style="padding:10px 0;border-bottom:1px solid #eee;">
+            <b>${m.date || ""}</b> • <span class="badge">Trận đơn</span><br>
+            ${m.xName} <b>${m.scoreX}</b> - <b>${m.scoreY}</b> ${m.yName}
+            <br>
+            <span class="muted">Thắng: ${xWin ? m.xName : m.yName} • Quỹ +${money(m.fundAdded || 0)}</span>
+          </div>
+        `;
+      }
+
+      return `
+        <div style="padding:10px 0;border-bottom:1px solid #eee;">
+          <b>${m.date || ""}</b> • <span class="badge">Trận đôi</span><br>
+          ${m.aName} + ${m.bName}
+          <b>${m.scoreAB}</b> - <b>${m.scoreCD}</b>
+          ${m.cName} + ${m.dName}
+          <br>
+          <span class="muted">Quỹ +${money(m.fundAdded || 0)}</span>
+        </div>
+      `;
+    }
+
+    function renderMatches() {
+      document.getElementById("matchHistory").innerHTML = matches.map(renderMatchItem).join("") || `<p class="muted">Chưa có trận đấu.</p>`;
+    }
+
+    function renderAll() {
+      fillMemberSelects();
+      renderDashboard();
+      renderRanking();
+      renderFund();
+      renderMatches();
+    }
+
+    onSnapshot(collection(db, "members"), (snapshot) => {
+      members = snapshot.docs.map(docSnap => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+      renderAll();
     });
-};
 
-window.renderDiaryFeed = () => {
-    document.getElementById('diaryFeed').innerHTML = diaryData.slice().reverse().map(d => `
-        <div class="diary-post">
-            <img src="${d.img}" class="diary-img">
-            <div class="diary-body">
-                <div style="display:flex; align-items:center; margin-bottom:10px;">
-                    <img src="${d.avatar || 'https://via.placeholder.com/30'}" style="width:30px; height:30px; border-radius:50%; margin-right:10px;">
-                    <b>${esc(d.user)}</b> <span style="color:#888; font-size:0.8em; margin-left:10px;">${d.date}</span>
-                </div>
-                <h3>${esc(d.title)}</h3>
-            </div>
-        </div>
-    `).join('');
-};
+    onSnapshot(query(collection(db, "matches"), orderBy("createdAt", "desc")), (snapshot) => {
+      matches = snapshot.docs.map(docSnap => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+      renderAll();
+    });
 
-// RENDERERS
-function renderDashboard() {
-    document.getElementById('statMatches').textContent = matchesData.length;
-    let tf = 0;
-    const html = membersData.map(m => {
-        tf += (m.losses * 100000);
-        return `<tr><td><b>${esc(m.name)}</b></td><td>${m.matches}</td><td>${m.wins}</td><td>${m.losses}</td><td>${1000+m.wins-m.losses}</td></tr>`;
-    }).join('');
-    document.getElementById('rankTable').querySelector('tbody').innerHTML = html;
-    document.getElementById('statFund').textContent = tf.toLocaleString();
-}
+    onSnapshot(query(collection(db, "fundLogs"), orderBy("createdAt", "desc")), (snapshot) => {
+      fundLogs = snapshot.docs.map(docSnap => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+      renderAll();
+    });
 
-function renderMatches() {
-    document.getElementById('matchesList').innerHTML = matchesData.slice().reverse().map(m => `
-        <div class="summary-card">
-            <b>📅 ${esc(m.date)}</b> | ${esc(m.teams)} | <span style="color:var(--green)">${esc(m.score)}</span>
-            ${currentUser ? `<br><button onclick="editMatch('${m._key}')" style="margin-top:5px; cursor:pointer; padding:2px 8px;">[Sửa]</button>` : ''}
-        </div>
-    `).join('');
-}
+    window.showTab = function(tabId, btn) {
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(tab => tab.classList.remove("active"));
+      document.getElementById(tabId).classList.add("active");
+      btn.classList.add("active");
+    };
 
-function renderFund() {
-    document.getElementById('fundTableBody').innerHTML = membersData.map(m => `
-        <tr><td><b>${esc(m.name)}</b></td><td>${m.losses}</td><td style="color:var(--orange); font-weight:bold;">${(m.losses*100000).toLocaleString()}đ</td></tr>
-    `).join('');
-}
+    window.initMembers = initMembers;
+    window.addMember = addMember;
+    window.addSingleMatch = addSingleMatch;
+    window.addDoubleMatch = addDoubleMatch;
 
-const toBase64 = f => new Promise((res, rej) => {
-    const r = new FileReader(); r.readAsDataURL(f);
-    r.onload = () => res(r.result); r.onerror = rej;
-});
-
-function resetMatchForm() {
-    document.getElementById('editMatchKey').value = ""; document.getElementById('mDate').value = "";
-    document.getElementById('mTeams').value = ""; document.getElementById('mScore').value = "";
-    document.getElementById('matchFormTitle').textContent = "➕ Thêm trận mới";
-}
-
-document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => {
-    document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
-    b.classList.add('active'); document.getElementById(b.dataset.tab).classList.add('active');
-});
-</script>
+    fillScores();
+    fillDates();
+  </script>
 </body>
 </html>
